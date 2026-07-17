@@ -1,0 +1,13 @@
+**/node_modules
+**/dist
+**/dist-ssr
+server/.env
+client/.env
+runtime/qmp/*
+!runtime/qmp/.gitkeep
+.git
+.gitignore
+*.log
+.DS_Store
+.vscode
+.idea

@@ -1,0 +1,21 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    restart: unless-stopped
+    # Not published to the host: the client's nginx proxies to it over the
+    # compose network. Uncomment below only if you want to hit it directly.
+    # ports:
+    #   - "3000:3000"
+    expose:
+      - "3000"
+
+  client:
+    build:
+      context: ./client
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - server
