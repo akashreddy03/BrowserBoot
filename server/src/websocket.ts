@@ -7,8 +7,16 @@ import type { Session } from './types/Session.js';
 export default function setupWebsockets(server: any, sessionManager: typeof SessionManager) {
     const wss = new WebSocketServer({ server });
 
-    wss.on('connection', (ws, req) => {
+    function heartbeat(this: any) {
+        this.isAlive = true;
+    }
+
+    wss.on('connection', (ws: WebSocket & { isAlive?: boolean }, req) => {
         const sessionId = req.url?.split('/').pop();
+
+        ws.isAlive = true;
+
+        ws.on('pong', heartbeat);
 
         if (!sessionId) {
             ws.close(1008, 'Session ID is required');
@@ -32,7 +40,24 @@ export default function setupWebsockets(server: any, sessionManager: typeof Sess
         
     });
 
+    const interval = setInterval(() => {
+        for (const ws of wss.clients as Set<WebSocket & { isAlive?: boolean }>) {
+            if (!ws.isAlive) {
+                console.log("Client didn't respond to ping. Terminating.");
+                ws.terminate();
+                continue;
+            }
 
+            ws.isAlive = false;
+
+            console.log("PING -> client");
+            ws.ping();
+        }
+    }, 30000);
+
+    wss.on("close", () => {
+        clearInterval(interval);
+    })
 };
 
 function handleVnc(client: WebSocket, session: Session) {
