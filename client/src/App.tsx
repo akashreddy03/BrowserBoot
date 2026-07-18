@@ -110,8 +110,8 @@ function App() {
 
             <div ref={workspaceRef} className={`workspace-stage${fullscreen ? " fullscreen-stage" : ""}`}>
                 <SessionWorkspace
-                    vncUrl={running ? window.location.protocol === "https:" ? "wss" : "ws" + "://" + window.location.host + "/ws/vnc/" + sessionId : null}
-                    serialUrl={running ? window.location.protocol === "https:" ? "wss" : "ws" + "://" + window.location.host + "/ws/serial/" + sessionId : null}
+                    vncUrl={running ? (window.location.protocol === "https:" ? "wss" : "ws") + "://" + window.location.host + "/ws/vnc/" + sessionId : null}
+                    serialUrl={running ? (window.location.protocol === "https:" ? "wss" : "ws") + "://" + window.location.host + "/ws/serial/" + sessionId : null}
                     running={running}
                     fullscreen={fullscreen}
                     toggleFullscreen={toggleFullscreen}
