@@ -52,7 +52,7 @@ export default function SerialTerminal({ serialUrl }: { serialUrl: string | null
         };
 
         ws.onclose = (event) => {
-            term.writeln("Websocket closed: " + event.code.toString());
+            term.writeln("Websocket closed: " + event.code.toString() + " " + event.reason.toString());
         }
 
         term.onData((data) => {
