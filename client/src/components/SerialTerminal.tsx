@@ -51,6 +51,10 @@ export default function SerialTerminal({ serialUrl }: { serialUrl: string | null
             term.writeln("\r\n[serial] connection error");
         };
 
+        ws.onclose = (event) => {
+            term.writeln("Websocket closed: " + event.code.toString());
+        }
+
         term.onData((data) => {
             ws.send(data);
         });
