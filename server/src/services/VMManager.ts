@@ -53,6 +53,7 @@ class VMManager {
         const vm = this.vms.get(sessionId);
         if(!vm) throw new Error("VM not found for session: " + sessionId);
         vm.process.kill();
+        this.vms.delete(sessionId);
     };
 
     async restartVM(sessionId: string) {
