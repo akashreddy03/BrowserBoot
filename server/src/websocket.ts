@@ -3,7 +3,6 @@ import net from 'net';
 import type SessionManager from './services/SessionManager.js';
 import { WebSocket } from 'ws';
 import type { Session } from './types/Session.js';
-import { compressDeflate } from 'zlib/iter';
 
 export default function setupWebsockets(server: any, sessionManager: typeof SessionManager) {
     const wss = new WebSocketServer({ server });
