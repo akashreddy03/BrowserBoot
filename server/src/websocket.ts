@@ -8,6 +8,10 @@ export default function setupWebsockets(server: any, sessionManager: typeof Sess
     const wss = new WebSocketServer({ server });
 
     function heartbeat(this: any) {
+<<<<<<< HEAD
+=======
+        console.log("Pong received");
+>>>>>>> e944d6f (Added ping/pong logic to maintain ws connection)
         this.isAlive = true;
     }
 
