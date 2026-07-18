@@ -3,6 +3,7 @@ import net from 'net';
 import type SessionManager from './services/SessionManager.js';
 import { WebSocket } from 'ws';
 import type { Session } from './types/Session.js';
+import { compressDeflate } from 'zlib/iter';
 
 export default function setupWebsockets(server: any, sessionManager: typeof SessionManager) {
     const wss = new WebSocketServer({ server });
@@ -50,21 +51,25 @@ function handleVnc(client: WebSocket, session: Session) {
     browserStream.pipe(qemuStream);
     qemuStream.pipe(browserStream);
 
-    browserStream.on('close', () => {
+    browserStream.on('close', (event) => {
+        console.log("Browser socket closed: ", event);
         qemu.close();
         qemuStream.end()
     });
-    qemuStream.on('close', () => {
+    qemuStream.on('close', (event) => {
+        console.log("Qemu socket closed: ", event);
         client.close();
         browserStream.end()
     });
 
-    qemuStream.on('error', () => {
+    qemuStream.on('error', (event) => {
+        console.log("Qemu socket error: ", event);
         client.close();
         browserStream.destroy();
     })
 
-    browserStream.on('error', () => {
+    browserStream.on('error', (code) => {
+        console.log("Browser socket error: ", code);
         qemu.close();
         qemuStream.destroy();
     })
@@ -85,11 +90,18 @@ function handleSerial(ws: WebSocket, session: Session) {
         ws.send(data.toString());
     });
 
-    socket.on('end', () => {
+    socket.on('close', (event) => {
+        console.log("serial TCP socket closed: ", event);
+        ws.close(1000, 'Serial connection closed');
+    })
+
+    socket.on('end', (event) => {
+        console.log("serial TCP socket closed: ", event);
         ws.close(1000, 'Serial connection closed');
     });
 
     socket.on('error', (err) => {
+        console.log("serial TCP socket closed: ", err);
         ws.close(1011, 'Socket error');
     });
     
@@ -97,7 +109,8 @@ function handleSerial(ws: WebSocket, session: Session) {
         socket.write(data.toString());
     });
 
-    ws.on('close', () => {
+    ws.on('close', (event) => {
+        console.log("Serial backend ws closed: ", event);
         socket.destroy();
     });
 
