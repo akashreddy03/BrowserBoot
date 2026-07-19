@@ -1,3 +1,4 @@
+import { Box } from "@chakra-ui/react";
 import RFB from "@novnc/novnc";
 import React, { useEffect } from "react";
 
@@ -26,5 +27,12 @@ export default function NoVnc({ url }: { url: string | null }) {
         }
     }, [url]);
 
-    return <div ref={containerRef} style={{ width: "100%", height: "100%", background: "black" }} />;
+    return (
+        <Box
+            ref={containerRef}
+            w="100%"
+            h="100%"
+            bg="black"
+        />
+    );
 }

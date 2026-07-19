@@ -1,4 +1,16 @@
-import { LoaderCircle, Play } from "lucide-react";
+import {
+    Badge,
+    Box,
+    Button,
+    Flex,
+    Group,
+    Heading,
+    HStack,
+    Text,
+} from "@chakra-ui/react";
+import { LuPlay } from "react-icons/lu";
+import { ColorModeButton } from "./ui/color-mode";
+import { useAppTheme } from "../hooks/useAppTheme";
 
 interface AppHeaderProps {
     onLaunchSession: () => void;
@@ -9,27 +21,79 @@ interface AppHeaderProps {
 }
 
 export default function AppHeader({ onLaunchSession, running, sessionId, fullscreen, launching }: AppHeaderProps) {
+    const theme = useAppTheme();
+
     return (
-        <header className={`navbar${fullscreen ? " compact" : ""}`}>
-            <div className="brand-block">
-                <div className="brand-title-row">
-                    <span className="brand-mark" />
-                    <h1>BrowserBoot</h1>
-                </div>
-                {!fullscreen && <p className="brand-tagline">Boot and test your operating system directly from your browser.</p>}
-            </div>
+        <Flex
+            as="header"
+            align="center"
+            justify="space-between"
+            gap={4}
+            px={4}
+            py={fullscreen ? 2.5 : 3}
+            borderWidth="1px"
+            borderColor={theme.panelBorder}
+            borderRadius={fullscreen ? "lg" : "2xl"}
+            bg={theme.headerBg}
+            backdropFilter="blur(20px)"
+            boxShadow="sm"
+        >
+            <Box>
+                <HStack gap={2.5}>
+                    <Box
+                        boxSize="2.5"
+                        borderRadius="full"
+                        bgGradient="to-br"
+                        gradientFrom="blue.400"
+                        gradientTo="cyan.400"
+                        boxShadow="0 0 0 4px rgba(96, 165, 250, 0.16)"
+                    />
+                    <Heading size={fullscreen ? "sm" : "md"} letterSpacing="tight">
+                        BrowserBoot
+                    </Heading>
+                </HStack>
+                {!fullscreen && (
+                    <Text color="fg.muted" fontSize="sm" mt={1}>
+                        Boot and test your operating system directly from your browser.
+                    </Text>
+                )}
+            </Box>
 
-            <div className="navbar-actions">
-                <div className={`session-pill ${running ? "running" : ""}`}>
-                    <span className={`status-dot ${running ? "running" : ""}`} />
-                    {running ? `Session ${sessionId.slice(0, 8)}` : "Ready to launch"}
-                </div>
+            <Group gap={2}>
+                <ColorModeButton variant="subtle" borderRadius="full" />
 
-                <button className={`launch-btn${launching ? " loading" : ""}`} onClick={onLaunchSession} disabled={running || launching}>
-                    {launching ? <LoaderCircle size={18} className="spin" /> : <Play size={18} />}
-                    {launching ? "Launching..." : "Launch Session"}
-                </button>
-            </div>
-        </header>
+                <Badge
+                    variant="subtle"
+                    colorPalette={running ? "green" : "gray"}
+                    px={3}
+                    py={1.5}
+                    borderRadius="full"
+                    fontSize="sm"
+                    fontWeight="medium"
+                >
+                    <HStack gap={2}>
+                        <Box
+                            boxSize="2"
+                            borderRadius="full"
+                            bg={running ? "green.400" : "gray.500"}
+                            boxShadow={running ? "0 0 0 3px rgba(34, 197, 94, 0.2)" : undefined}
+                        />
+                        <Text as="span">{running ? `Session ${sessionId.slice(0, 8)}` : "Ready to launch"}</Text>
+                    </HStack>
+                </Badge>
+
+                <Button
+                    colorPalette="blue"
+                    borderRadius="full"
+                    onClick={onLaunchSession}
+                    disabled={running || launching}
+                    loading={launching}
+                    loadingText="Launching..."
+                >
+                    <LuPlay />
+                    Launch Session
+                </Button>
+            </Group>
+        </Flex>
     );
 }

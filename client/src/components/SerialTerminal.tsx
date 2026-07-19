@@ -1,10 +1,13 @@
+import { Box } from "@chakra-ui/react";
 import { useEffect, useRef } from "react";
 import { Terminal } from "xterm";
+import { useColorModeValue } from "./ui/color-mode";
 
 import "xterm/css/xterm.css";
 
 export default function SerialTerminal({ serialUrl }: { serialUrl: string | null }) {
     const terminalRef = useRef<HTMLDivElement>(null);
+    const terminalFg = useColorModeValue("#16a34a", "#4ade80");
 
     useEffect(() => {
         if (!terminalRef.current || !serialUrl) return;
@@ -15,9 +18,9 @@ export default function SerialTerminal({ serialUrl }: { serialUrl: string | null
             convertEol: true,
             fontFamily: "JetBrains Mono, monospace",
             theme: {
-                foreground: "#00FF00",
-                background: "#020617",
-                cursor: "#00FF00",
+                foreground: terminalFg,
+                background: "transparent",
+                cursor: terminalFg,
             },
         });
 
@@ -66,7 +69,17 @@ export default function SerialTerminal({ serialUrl }: { serialUrl: string | null
             ws.close();
             term.dispose();
         };
-    }, [serialUrl]);
+    }, [serialUrl, terminalFg]);
 
-    return <div ref={terminalRef} className="terminal-surface" />;
+    return (
+        <Box
+            ref={terminalRef}
+            h="100%"
+            w="100%"
+            minH="100%"
+            position="relative"
+            zIndex={0}
+            overflow="hidden"
+        />
+    );
 }
