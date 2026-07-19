@@ -11,8 +11,12 @@ node_modules
 dist
 dist-ssr
 *.local
-kernels/*
+images/*
+!images/.gitkeep
 runtime/qmp/*
+!runtime/qmp/.gitkeep
+runtime/qcow2/*
+!runtime/qcow2/.gitkeep
 
 # Editor directories and files
 .vscode/*
