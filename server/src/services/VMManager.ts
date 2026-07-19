@@ -1,5 +1,6 @@
 import { spawn } from "child_process";
 import type { VM } from "../types/VM.js";
+import type { BootOptions } from "../types/Session.js";
 import { waitForPort } from "../utils.js";
 import QMPClient from "./QMPClient.js";
 import QemuLauncher from "./QemuLauncher.js";
@@ -17,19 +18,22 @@ class VMManager {
 
     private readonly IMAGES_DIR = "../images";
 
-    async start(sessionId: string, imageFile?: string): Promise<VM> {
+    async start(sessionId: string, bootOptions?: BootOptions): Promise<VM> {
         const { vncPort, serialPort } = this.allocatePorts();
 
         const qmpSock = path.resolve("../runtime/qmp/" + sessionId + ".sock");
         const qcow2disk = path.resolve("../runtime/qcow2/" + sessionId + ".qcow2");
 
         // Default to alpine-std.qcow2 if no image specified
-        const bootImage = imageFile ?? path.resolve(path.join(process.cwd(), this.IMAGES_DIR) + "/alpine-std.qcow2");
+        const imageFile = bootOptions?.image ?? "alpine-std.qcow2";
+        const bootImage = path.resolve(path.join(process.cwd(), this.IMAGES_DIR), imageFile);
         console.log("BOOT IMAGE: ", bootImage);
         const imageType = this.getImageType(bootImage);
         console.log("IMAGE TYPE: ", imageType);
         console.log("QCOW2DISK: ", qcow2disk);
-        await this.createDisk(qcow2disk, bootImage, imageType);
+
+        const diskSize = bootOptions?.disk ?? "2G";
+        await this.createDisk(qcow2disk, bootImage, imageType, diskSize);
 
         const qemuProcess = QemuLauncher.launch(
             qmpSock,
@@ -37,7 +41,9 @@ class VMManager {
             serialPort,
             this.VNC_BASE_PORT,
             bootImage,
-            qcow2disk
+            qcow2disk,
+            bootOptions?.ram ?? "512M",
+            bootOptions?.cpu ?? 1,
         );
 
         const vm: VM = {
@@ -69,14 +75,14 @@ class VMManager {
         });
     }
 
-    async createDisk(qcow2disk: string, imageFile: string, imageType: string) {
+    async createDisk(qcow2disk: string, imageFile: string, imageType: string, diskSize: string = "2G") {
         return new Promise<void>((resolve, reject) => {
             const args: string[] = ["create", "-f", "qcow2"];
 
             console.log(imageType);
 
             if (imageType === 'iso') {
-                args.push(qcow2disk, "2G");
+                args.push(qcow2disk, diskSize);
             } else if (imageType === 'qcow2') {
                 args.push("-F", "qcow2", "-b", imageFile, qcow2disk);
             } else {

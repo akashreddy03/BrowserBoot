@@ -1,20 +1,21 @@
-import { type Session, type SessionResponse, SessionState } from '../types/Session.js';
+import { type Session, type SessionResponse, SessionState, type BootOptions } from '../types/Session.js';
 import { nanoid } from 'nanoid';
 import VMManager from './VMManager.js';
 
 class SessionManager {
     private sessions = new Map<string, Session>();
 
-    async createSession(): Promise<SessionResponse> {
+    async createSession(bootOptions?: BootOptions): Promise<SessionResponse> {
 
         const session: Session = {
             id: nanoid(10),
             state: SessionState.Running,
             createdAt: new Date(),
             expiresAt: new Date(Date.now() + 1800000), // 30 mins from now
+            bootOptions,
         };
 
-        const vm = await VMManager.start(session.id);
+        const vm = await VMManager.start(session.id, bootOptions);
 
         session.vm = vm;
 

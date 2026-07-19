@@ -1,8 +1,9 @@
 import { Router } from "express"
-import { restartVM } from "../controllers/vm.controller.js";
+import { restartVM, getImages } from "../controllers/vm.controller.js";
 
 const router = Router();
 
 router.post('/restart', restartVM);
+router.get('/images', getImages);
 
 export default router;

@@ -6,6 +6,13 @@ export enum SessionState {
     Waiting = 'waiting'
 }
 
+export interface BootOptions {
+    ram: string;
+    disk: string;
+    cpu: number;
+    image: string;
+}
+
 export interface SessionResponse {
     id: string;
     state: SessionState;
@@ -19,4 +26,5 @@ export interface Session {
     createdAt: Date;
     expiresAt: Date;
     vm?: VM;
+    bootOptions?: BootOptions | undefined;
 }

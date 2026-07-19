@@ -24,6 +24,13 @@ export interface BootOptionsConfig {
     image: string;
 }
 
+interface ImageInfo {
+    filename: string;
+    label: string;
+    type: "iso" | "qcow2";
+    size: number;
+}
+
 interface BootOptionsProps {
     visible: boolean;
     initial: BootOptionsConfig;
@@ -31,11 +38,6 @@ interface BootOptionsProps {
     onCancel: () => void;
     onConfirm: (opts: BootOptionsConfig) => void;
 }
-
-const DEFAULT_IMAGES = [
-    { value: "alpine-std.qcow2", label: "Alpine Linux (x86_64)" },
-    { value: "kernel.iso", label: "Generic kernel ISO" },
-] as const;
 
 const IMAGE_EXTENSIONS = [".iso", ".qcow2"];
 
@@ -62,18 +64,41 @@ export default function BootOptions({
     const [imageSource, setImageSource] = useState<"preset" | "custom">("preset");
     const [dragging, setDragging] = useState(false);
     const [fileError, setFileError] = useState<string | null>(null);
+    const [images, setImages] = useState<ImageInfo[]>([]);
+    const [loading, setLoading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Fetch available images from the server
+    useEffect(() => {
+        if (!visible) return;
+
+        setLoading(true);
+        fetch("/api/vm/images")
+            .then((res) => res.json())
+            .then((data: ImageInfo[]) => {
+                setImages(data);
+                // If current image is not in the fetched list, reset to first available
+                if (data.length > 0 && !data.some((img) => img.filename === initial.image)) {
+                    selectPreset(data[0].filename);
+                }
+            })
+            .catch(() => {
+                // Fallback to nothing on error — dropdown will be empty
+                setImages([]);
+            })
+            .finally(() => setLoading(false));
+    }, [visible]);
 
     useEffect(() => {
         if (visible) {
             setOpts(initial);
             setCustomFile(null);
             setImageSource(
-                DEFAULT_IMAGES.some((img) => img.value === initial.image) ? "preset" : "custom",
+                images.some((img) => img.filename === initial.image) ? "preset" : "custom",
             );
             setFileError(null);
         }
-    }, [visible, initial]);
+    }, [visible, initial, images]);
 
     const update = (patch: Partial<BootOptionsConfig>) => {
         const next = { ...opts, ...patch, cpu: 1 };
@@ -103,7 +128,9 @@ export default function BootOptions({
     const clearCustomFile = () => {
         setCustomFile(null);
         setFileError(null);
-        selectPreset(DEFAULT_IMAGES[0].value);
+        if (images.length > 0) {
+            selectPreset(images[0].filename);
+        }
     };
 
     const handleDrop = (event: DragEvent<HTMLDivElement>) => {
@@ -113,9 +140,11 @@ export default function BootOptions({
         if (file) selectCustomFile(file);
     };
 
-    const presetValue = DEFAULT_IMAGES.some((img) => img.value === opts.image)
+    const presetValue = images.some((img) => img.filename === opts.image)
         ? opts.image
-        : DEFAULT_IMAGES[0].value;
+        : images.length > 0
+          ? images[0].filename
+          : "";
 
     return (
         <Dialog.Root
@@ -192,13 +221,23 @@ export default function BootOptions({
                             <Stack gap={3}>
                                 <Field.Root w="full">
                                     <Field.Label>Default images</Field.Label>
-                                    <NativeSelect.Root w="full">
+                                    <NativeSelect.Root w="full" disabled={loading}>
                                         <NativeSelect.Field
                                             value={presetValue}
                                             onChange={(e) => selectPreset(e.currentTarget.value)}
                                         >
-                                            {DEFAULT_IMAGES.map((img) => (
-                                                <option key={img.value} value={img.value}>
+                                            {loading && (
+                                                <option value="" disabled>
+                                                    Loading...
+                                                </option>
+                                            )}
+                                            {!loading && images.length === 0 && (
+                                                <option value="" disabled>
+                                                    No images available
+                                                </option>
+                                            )}
+                                            {images.map((img) => (
+                                                <option key={img.filename} value={img.filename}>
                                                     {img.label}
                                                 </option>
                                             ))}
@@ -206,7 +245,7 @@ export default function BootOptions({
                                         <NativeSelect.Indicator />
                                     </NativeSelect.Root>
                                     <Field.HelperText>
-                                        Images readily available.
+                                        Images readily available on the server.
                                     </Field.HelperText>
                                 </Field.Root>
 

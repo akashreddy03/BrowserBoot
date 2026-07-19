@@ -8,11 +8,14 @@ class QemuLauncher {
         serialPort: number,
         vncBasePort: number,
         imageFile: string,
-        qcow2Disk: string
+        qcow2Disk: string,
+        ram: string = "512M",
+        cpu: number = 1,
     ): ChildProcess {
 
         const args = [
-            "-m", "512M",
+            "-m", ram,
+            "-smp", `cpus=${cpu}`,
             "-serial", `tcp:127.0.0.1:${serialPort},server=on,nowait`,
             "-vnc", `:${vncPort - vncBasePort},websocket=on`,
             "-qmp", `unix:${qmpSock},server=on,wait=off`,
