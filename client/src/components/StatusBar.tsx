@@ -1,4 +1,4 @@
-import { Badge, Grid, HStack, Text } from "@chakra-ui/react";
+import { Grid, HStack, Text } from "@chakra-ui/react";
 import { LuActivity } from "react-icons/lu";
 import { useAppTheme } from "../hooks/useAppTheme";
 
