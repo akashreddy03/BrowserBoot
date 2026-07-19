@@ -2,14 +2,20 @@ import type { Request, Response } from "express";
 import SessionManager from "../services/SessionManager.js";
 
 export async function createSession(req: Request, res: Response) {
-    const session = await SessionManager.createSession();
-    res.cookie("browserboot__session", session.id, {
-        httpOnly: true,
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 30 * 60 * 1000
-    });
-    res.json(session);
+    const id = req.cookies.browserboot__session;
+    if(id && SessionManager.getSession(id)) {
+        res.status(409);
+    } else {
+        const session = await SessionManager.createSession();
+        res.cookie("browserboot__session", session.id, {
+            httpOnly: true,
+            sameSite: "lax",
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 30 * 60 * 1000
+        });
+        res.json(session);
+    }
+    
 }
 
 export function getSession(req: Request, res: Response) {
