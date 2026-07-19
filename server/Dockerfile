@@ -18,9 +18,9 @@ WORKDIR /app
 COPY server/package.json server/package-lock.json ./server/
 RUN cd server && npm ci
 
-# App source + the kernel image the server boots
+# App source + the image the server boots
 COPY server ./server
-COPY kernels ./kernels
+COPY images ./images
 
 # config.ts resolves kernels as ../kernels relative to process.cwd() (=/app/server),
 # and websocket/VMManager write qmp sockets under ../runtime/qmp relative to /app/server.
