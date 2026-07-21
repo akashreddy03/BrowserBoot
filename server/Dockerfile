@@ -20,11 +20,11 @@ RUN cd server && npm ci
 
 # App source + the image the server boots
 COPY server ./server
-COPY images ./images
 
 # config.ts resolves kernels as ../kernels relative to process.cwd() (=/app/server),
 # and websocket/VMManager write qmp sockets under ../runtime/qmp relative to /app/server.
 RUN mkdir -p /app/runtime/qmp
+RUN mkdir -p /app/runtime/qcow2
 
 WORKDIR /app/server
 

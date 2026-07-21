@@ -4,6 +4,8 @@ services:
       context: .
       dockerfile: server/Dockerfile
     restart: unless-stopped
+    volumes:
+      -./images:/app/images:ro
     # Not published to the host: the client's nginx proxies to it over the
     # compose network. Uncomment below only if you want to hit it directly.
     # ports:

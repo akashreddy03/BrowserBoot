@@ -3,6 +3,8 @@
 **/dist-ssr
 server/.env
 client/.env
+runtime/qcow2
+!runtime/qcow2/.gitkeep
 runtime/qmp/*
 !runtime/qmp/.gitkeep
 .git
