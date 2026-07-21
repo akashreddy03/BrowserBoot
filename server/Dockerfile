@@ -9,6 +9,7 @@ FROM node:22-bookworm-slim
 # software emulation (TCG) and does not require --device /dev/kvm.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         qemu-system-x86 \
+        qemu-utils \
         ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
