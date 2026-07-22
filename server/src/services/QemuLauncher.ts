@@ -14,11 +14,13 @@ class QemuLauncher {
     ): ChildProcess {
 
         const args = [
+            "-accel", "tcg,thread=multi",
             "-m", ram,
             "-smp", `cpus=${cpu}`,
             "-serial", `tcp:127.0.0.1:${serialPort},server=on,nowait`,
             "-vnc", `:${vncPort - vncBasePort},websocket=on`,
             "-qmp", `unix:${qmpSock},server=on,wait=off`,
+            "-display", "none",
             ...this.buildArgs(imageFile, qcow2Disk)
         ];
 
