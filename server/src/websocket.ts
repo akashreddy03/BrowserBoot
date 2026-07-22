@@ -54,7 +54,7 @@ export default function setupWebsockets(server: any, sessionManager: typeof Sess
             console.log("PING -> client");
             ws.ping();
         }
-    }, 10000);
+    }, 30000);
 
     wss.on("close", () => {
         clearInterval(interval);
